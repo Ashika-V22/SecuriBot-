@@ -369,7 +369,29 @@ function animateMessageDfa(dfa){
     i++; setTimeout(step,420);
   })();
 }
-
+const replies = {
+  "hello": "Hello! 👋",
+  "hi": "Hi there! 😊",
+  "hey": "Hey! How can I help you?",
+  "how are you": "I'm just code, but I'm doing great! 😄",
+  "who are you": "I'm Securibot, your security assistant 🤖",
+ "what can you do": "I can chat, analyze passwords, scan URLs, and even check QR codes! 🛡️",
+  "tell me a joke": "Why did the hacker break up with the Wi-Fi? Too many connections! 😂",
+  "good morning": "Good morning! ☀️ Time to secure the world!",
+  "good night": "Good night! 🌙 Don’t let the phishy emails bite!",
+  "thanks": "Anytime! 😊 Security first, fun second!",
+  "thank you": "You got it! 😎 Stay safe!",
+  "bye": "Bye! 👋 Don’t forget to update your passwords!",
+  "see you": "See you soon! 🛡️ Stay vigilant!",
+  "what's your favorite color": "Neon green 💚 – just like my alerts!",
+  "are you real": "As real as your localStorage 😉",
+  "i love coding": "Coding is love, coding is life! 💻❤️",
+  "help me": "Of course! Ask me anything about security or just chat 🤗",
+  "dance": "💃 I’d dance if I had legs! But here’s a virtual jig for you! 🕺",
+  "sing": "🎵 La la la… beep bop! Sorry, no real voice yet! (Oh wait, TTS works 😎)",
+  "motivate me": "Remember: Secure today, safe tomorrow! 🌟 You got this!",
+  // Add more custom replies here
+};
 /* -------------------------
    Password DFA + entropy
    ------------------------- */
@@ -712,3 +734,4 @@ window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.
 </script>
 </body>
 </html>
+
