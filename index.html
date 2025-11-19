@@ -326,7 +326,6 @@ function pushHistory(obj){ const h = loadHistory(); h.push(obj); if (h.length>40
 function renderLogs(){ const h = loadHistory().slice(-30).reverse(); logBox.innerHTML = h.map(x=>`<div class="mini">[${new Date(x.time).toLocaleString()}] ${x.label || x.type}: ${x.summary || (x.text||'')}</div>`).join('') }
 
 /* tiny sound helper */
-function playSound(){ try { sndReply.currentTime = 0; sndReply.play().catch(()=>{}); } catch(e){} }
 
 /* append chat message */
 function appendMessage(sender, text){
@@ -335,6 +334,19 @@ function appendMessage(sender, text){
   const ts = document.createElement('span'); ts.className='mini'; ts.style.marginTop='6px'; ts.style.color='var(--muted)'; ts.textContent = new Date().toLocaleString(); wrap.appendChild(ts);
   chatWindow.appendChild(wrap); chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+sendBtn.addEventListener('click', ()=>{
+    const input = userInput.value.trim();
+    if(!input) return;
+
+    const lower = input.toLowerCase();
+    if(replies[lower]){
+        appendMessage('bot', replies[lower]);
+        userInput.value = "";
+        return; // stop further processing if custom reply found
+    }
+
+    // existing logic here (DFA, password, URL, etc.)
+});
 
 /* -------------------------
    TOC / DFA logic
@@ -369,6 +381,14 @@ function animateMessageDfa(dfa){
     i++; setTimeout(step,420);
   })();
 }
+/* -------------------------
+   Simple replies for chatbot — All 20
+   ------------------------- */
+   /* -------------------------
+   Replies & Chat Handler
+   ------------------------- */
+
+// Define your quick replies
 const replies = {
   "hello": "Hello! 👋",
   "hi": "Hi there! 😊",
@@ -392,6 +412,67 @@ const replies = {
   "motivate me": "Remember: Secure today, safe tomorrow! 🌟 You got this!",
   // Add more custom replies here
 };
+
+
+
+// Connect button & Enter key
+sendBtn.addEventListener('click', handleUserInput);
+userInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleUserInput();
+});
+
+/* function to get bot reply */
+function getReply(input){
+  const text = input.toLowerCase().trim();
+
+  // match specific commands with startsWith
+  if(text.startsWith("check password:")) return "Running password analysis... 🔐";
+  if(text.startsWith("scan url:")) return "Scanning the URL for threats... 🌐";
+
+  // generic replies
+  return replies[text] || "Sorry, I didn't understand that. 🤔";
+}
+
+/* -------------------------
+   Speak the reply (TTS)
+   ------------------------- */
+function speakReply(text){
+  if('speechSynthesis' in window){
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+/* -------------------------
+   Send message function
+   ------------------------- */
+function handleUserInput(){
+  const userText = userInput.value.trim();
+  if(!userText) return;
+
+  appendMessage('user', userText);
+  userInput.value = '';
+  typingBox.style.display = 'block';
+
+  setTimeout(()=>{
+    typingBox.style.display = 'none';
+    const botText = getReply(userText);
+    appendMessage('bot', botText);
+    playSound();
+    speakReply(botText);
+    pushHistory({type:'chat', text:userText, label:'user', summary:botText, time:Date.now()});
+  }, 500);
+}
+
+/* -------------------------
+   Event listeners
+   ------------------------- */
+sendBtn.addEventListener('click', handleUserInput);
+userInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') handleUserInput(); });
+ttsBtn.addEventListener('click', ()=>{ const last = chatWindow.lastChild?.querySelector('.msg.bot'); if(last) speakReply(last.textContent); });
+voiceBtn.addEventListener('click', ()=>{ startVoiceInput(); });
+voiceInputBtn.addEventListener('click', ()=>{ startVoiceInput(); });
 /* -------------------------
    Password DFA + entropy
    ------------------------- */
@@ -410,6 +491,7 @@ function analyzePasswordDFA(password){
   }
   if (password.length>=8 && hasLetter && hasNumber && hasSpecial){ state='q4'; states.push('q4') }
   return { progression: states, finalState: state, strong: state==='q4', hasLetter, hasNumber, hasSpecial };
+  
 }
 
 function estimateEntropy(password){
@@ -734,4 +816,3 @@ window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.
 </script>
 </body>
 </html>
-
