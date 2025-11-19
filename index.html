@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Securibot — Ultimate Chatbot (All Features)</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#02050a;
+  --panel:#071018;
+  --neon:#36ff88;
+  --accent:#8b5cf6;
+  --muted:#9aa6a6;
+  --glass:rgba(255,255,255,0.02);
+  --mono: 'Share Tech Mono', monospace;
+  --radius:12px;
+}
+
+/* Basic page */
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; font-family:var(--mono); -webkit-font-smoothing:antialiased}
+body{
+  background: radial-gradient(circle at 10% 10%, rgba(139,92,246,0.04), transparent 10%), linear-gradient(180deg,#04060a,var(--bg));
+  color:var(--neon);
+  padding:14px;
+}
+
+/* container */
+.wrap{
+  max-width:1200px; margin:0 auto; border-radius:14px; overflow:hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+  min-height:86vh; display:flex; flex-direction:column;
+}
+
+/* nav */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.02)}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, rgba(54,255,136,0.04), rgba(139,92,246,0.03));border:1px solid rgba(54,255,136,0.06);font-weight:800;color:var(--neon)}
+.title h1{margin:0;font-size:18px}
+.title p{margin:2px 0 0 0;font-size:12px;color:var(--muted)}
+.controls{display:flex;gap:8px;align-items:center}
+
+/* grid layout */
+.content{display:grid;grid-template-columns:1fr 380px;gap:16px;padding:18px}
+@media(max-width:980px){ .content{grid-template-columns:1fr} }
+
+/* panels */
+.panel{background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border:1px solid rgba(255,255,255,0.03); padding:12px; border-radius:var(--radius); box-shadow:0 8px 28px rgba(0,0,0,0.6); transition: transform .22s ease, box-shadow .22s ease;}
+.panel.tilt:hover{ transform: perspective(800px) rotateX(3deg) rotateY(-3deg) translateY(-6px); box-shadow:0 22px 46px rgba(0,0,0,0.7) }
+
+/* chat */
+.header-row{display:flex;gap:12px;align-items:center}
+.avatar{width:72px;height:72px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#052020,#001018);border:2px solid rgba(54,255,136,0.06);font-weight:900;color:var(--neon)}
+.avatar.glow{box-shadow:0 12px 40px rgba(54,255,136,0.06), 0 0 30px rgba(54,255,136,0.02) inset; transform: scale(1.03)}
+.typing{font-family:var(--mono);color:var(--muted);font-size:13px;margin-top:6px}
+.dots{display:inline-block;height:12px;width:36px}
+.dot{display:inline-block;margin:0 2px;width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:0.6}
+.dot.blink{animation: blink 1s infinite}
+.dot.blink:nth-child(2){animation-delay:.12s}
+.dot.blink:nth-child(3){animation-delay:.24s}
+@keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+
+/* chat window */
+.chat-window{height:52vh; overflow:auto; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(0,0,0,0.06), transparent)}
+.msg{max-width:82%; margin:10px 0; padding:10px 12px; border-radius:10px; white-space:pre-wrap; line-height:1.4}
+.msg.user{align-self:flex-end; background:rgba(255,255,255,0.04); color:#fff}
+.msg.bot{align-self:flex-start; background:rgba(54,255,136,0.04); color:var(--neon)}
+
+/* input row */
+.input-row{display:flex;gap:8px;margin-top:10px}
+.input-row input[type="text"]{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.6);color:var(--neon);outline:none}
+.btn{padding:10px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+.btn.primary{background:var(--neon);color:#000}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+
+/* small text */
+.mini{font-size:13px;color:var(--muted);font-family:var(--mono)}
+
+/* dfa visuals */
+.dfa-row{display:flex;align-items:center;gap:10px;margin-top:8px;justify-content:center}
+.state{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.06);color:var(--muted);transition:all .18s}
+.state.on{ background: linear-gradient(135deg, rgba(54,255,136,0.08), rgba(139,92,246,0.03)); color:var(--neon); border-color:rgba(54,255,136,0.15); transform:translateY(-6px); box-shadow:0 10px 30px rgba(54,255,136,0.035) }
+
+/* examples drawer */
+.examples{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.examples button{padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;text-align:left}
+
+
+
+/* utilities */
+.footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,0.02);color:var(--muted)}
+
+/* light mode (toggle) */
+body.light{background:linear-gradient(180deg,#f4f7fb,#e9edf8);color:#0b0f13}
+body.light .panel{background:linear-gradient(180deg, rgba(11,15,19,0.02), transparent)}
+body.light .msg.user{background:#f2fbff;color:#071018}
+body.light .msg.bot{background:#eaffef;color:#06320a}
+body.light .mini{color:#545b5b}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <!-- NAV -->
+  <div class="nav">
+    <div class="brand">
+      <div class="logo">⟨SB⟩</div>
+      <div class="title">
+        <h1>Securibot</h1>
+        <p>Ultimate Chatbot — TOC, Security Tools & Learning</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div id="privacyBadge" class="mini" title="Local-only processing">🔒 Local · Offline</div>
+      <button id="voiceBtn" class="btn ghost">🎤 Voice</button>
+      <button id="themeBtn" class="btn ghost">🌓 Theme</button>
+     
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <!-- LEFT column: Chat + core -->
+    <div>
+      <div class="panel tilt">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div id="avatar" class="avatar">SB</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Securibot — Security Chat Assistant</div>
+              <div id="statusLine" class="mini">Ready</div>
+            </div>
+            <div id="typingBox" class="typing" style="display:none"><span class="dots"><span class="dot blink"></span><span class="dot blink"></span><span class="dot blink"></span></span> Securibot typing...</div>
+          </div>
+        </div>
+
+        <div id="chatWindow" class="chat-window" aria-live="polite" style="margin-top:12px"></div>
+
+        <div class="input-row">
+          <input id="userInput" placeholder='Type: "check password: Pass@123" or "scan url: https://..."'/>
+          <button id="sendBtn" class="btn primary">Send</button>
+          <button id="clearBtn" class="btn ghost">Clear</button>
+          <button id="saveBtn" class="btn ghost">Export</button>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:center">
+          <div class="mini">Quick: <button id="samplePwd" class="btn ghost">Check sample pwd</button> <button id="examplesToggle" class="btn ghost">Examples</button></div>
+          <div style="display:flex;gap:8px">
+            <button id="voiceInputBtn" class="btn ghost">Voice Input</button>
+            <button id="ttsBtn" class="btn ghost">Speak Reply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel tilt" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">Conversation Log / Summary</div>
+          <div class="mini">Local history</div>
+        </div>
+        <div id="summaryBox" class="mini" style="margin-top:8px">No messages yet</div>
+        <div id="logBox" style="margin-top:10px; max-height:160px; overflow:auto;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT column: Tools + Visualizers -->
+    <div>
+      <!-- Message DFA -->
+      <div class="panel tilt">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700">Message DFA (Detector)</div><div class="mini">Result: <strong id="dfaLabel">—</strong></div></div>
+        <div class="mini" style="margin-top:8px">q0 → q1 (keywords) → q2 (links/credentials) → qF (phishy)</div>
+        <div class="dfa-row" style="margin-top:12px">
+          <div id="m-q0" class="state">q0</div><div class="mini">→</div>
+          <div id="m-q1" class="state">q1</div><div class="mini">→</div>
+          <div id="m-q2" class="state">q2</div><div class="mini">→</div>
+          <div id="m-qf" class="state">qF</div>
+        </div>
+
+        <div id="examplesPanel" style="display:none; margin-top:10px">
+          <div class="examples">
+            <button data-txt="Urgent: Your account is suspended. Click https://fake.bank/verify to restore access.">Phishy — suspension + link</button>
+            <button data-txt="Hey, I shared the photos. Check attachment.">Safe — friend message</button>
+            <button data-txt="Congratulations! You won a prize. Claim now: http://scam.link">Phishy — prize</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Visualizer -->
+      <div class="panel tilt" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700">DFA Training Visualizer</div><div class="mini">Interactive TOC demo</div></div>
+        <div style="margin-top:8px">
+          <input id="trainInput" placeholder="Type string to run DFA" style="width:100%;padding:10px;border-radius:8px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);color:var(--neon)"/>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="trainRun" class="btn ghost">Run</button>
+            <button id="trainClear" class="btn ghost">Clear</button>
+          </div>
+          <div class="dfa-row" style="margin-top:10px">
+            <div id="t-q0" class="state">q0</div><div class="mini">→</div>
+            <div id="t-q1" class="state">q1</div><div class="mini">→</div>
+            <div id="t-q2" class="state">q2</div><div class="mini">→</div>
+            <div id="t-qf" class="state">qF</div>
+          </div>
+          <div class="mini" style="margin-top:8px">Final: <strong id="trainLabel">—</strong></div>
+        </div>
+      </div>
+
+      <!-- Password DFA & Entropy -->
+      <div class="panel tilt" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700">Password DFA & Entropy</div><div class="mini">Visualizer</div></div>
+        <div class="mini" style="margin-top:6px">q0→q1(letter)→q2(+number)→q3(+symbol)→q4(accept if length≥8)</div>
+        <div class="dfa-row" style="margin-top:10px">
+          <div id="p-q0" class="state">q0</div><div class="mini">→</div>
+          <div id="p-q1" class="state">q1</div><div class="mini">→</div>
+          <div id="p-q2" class="state">q2</div><div class="mini">→</div>
+          <div id="p-q3" class="state">q3</div><div class="mini">→</div>
+          <div id="p-q4" class="state">q4</div>
+        </div>
+        <div id="pwdVerdict" class="mini" style="margin-top:8px">No password checked</div>
+
+        <div style="margin-top:10px">
+          <input id="pwdInput" placeholder="Type password to analyze here" style="width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);color:var(--neon)"/>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="pwdCheckBtn" class="btn ghost">Analyze</button>
+            <button id="pwdGenBtn" class="btn ghost">Generate Strong</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilities -->
+      <div class="panel tilt" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700">Utilities</div><div class="mini">URL / QR / Email Header</div></div>
+
+        <div style="margin-top:8px" class="mini">
+          <div style="margin-bottom:8px"><strong>URL Scanner</strong></div>
+          <input id="urlInput" placeholder="Paste a URL" style="width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);color:var(--neon)"/>
+          <div style="display:flex;gap:8px;margin-top:8px"><button id="scanUrlBtn" class="btn ghost">Scan</button><button id="checkRedirectBtn" class="btn ghost">Redirect (basic)</button></div>
+          <div id="urlResult" style="margin-top:8px"></div>
+        </div>
+
+        <div style="margin-top:12px" class="mini">
+          <div style="margin-bottom:8px"><strong>QR Scanner</strong></div>
+          <input id="qrInput" type="file" accept="image/*"/>
+          <div id="qrResult" style="margin-top:8px"></div>
+        </div>
+
+        <div style="margin-top:12px" class="mini">
+          <div style="margin-bottom:8px"><strong>Email Header Analyzer</strong></div>
+          <textarea id="headerInput" placeholder="Paste raw headers here" rows="4" style="width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);color:var(--neon)"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px"><button id="analyzeHeaderBtn" class="btn ghost">Analyze</button></div>
+          <div id="headerResult" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">Developed by Ashika V &amp; Vempali Hrishita © 2025 — Local &amp; Educational</footer>
+</div>
+
+<!-- tiny reply sound (base64 short beep) -->
+<audio id="sndReply" preload="auto">
+  <source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
+</audio>
+
+<script>
+/* ======================================================
+   Securibot — All-in-one frontend logic
+   - TOC-based DFA heuristics
+   - Password DFA + entropy
+   - URL heuristics + redirect check (CORS-limited)
+   - QR decode (BarcodeDetector where available)
+   - Email header analysis (simple)
+   - Voice input (SpeechRecognition) + TTS (speechSynthesis)
+   - History saved to localStorage
+   - Exports, examples, quiz, terminal placeholders
+   ====================================================== */
+
+/* -------------------------
+   DOM refs
+   ------------------------- */
+const chatWindow = document.getElementById('chatWindow');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const saveBtn = document.getElementById('saveBtn');
+const samplePwd = document.getElementById('samplePwd');
+const examplesToggle = document.getElementById('examplesToggle');
+const examplesPanel = document.getElementById('examplesPanel');
+const typingBox = document.getElementById('typingBox');
+const avatar = document.getElementById('avatar');
+const statusLine = document.getElementById('statusLine');
+const privacyBadge = document.getElementById('privacyBadge');
+const voiceBtn = document.getElementById('voiceBtn');
+const voiceInputBtn = document.getElementById('voiceInputBtn');
+const ttsBtn = document.getElementById('ttsBtn');
+const themeBtn = document.getElementById('themeBtn');
+
+
+const m_q0 = document.getElementById('m-q0'), m_q1 = document.getElementById('m-q1'), m_q2 = document.getElementById('m-q2'), m_qf = document.getElementById('m-qf');
+const dfaLabel = document.getElementById('dfaLabel');
+
+const t_q0 = document.getElementById('t-q0'), t_q1 = document.getElementById('t-q1'), t_q2 = document.getElementById('t-q2'), t_qf = document.getElementById('t-qf');
+const trainInput = document.getElementById('trainInput'), trainRun = document.getElementById('trainRun'), trainClear = document.getElementById('trainClear'), trainLabel = document.getElementById('trainLabel');
+
+const p_q0 = document.getElementById('p-q0'), p_q1 = document.getElementById('p-q1'), p_q2 = document.getElementById('p-q2'), p_q3 = document.getElementById('p-q3'), p_q4 = document.getElementById('p-q4');
+const pwdInput = document.getElementById('pwdInput'), pwdCheckBtn = document.getElementById('pwdCheckBtn'), pwdGenBtn = document.getElementById('pwdGenBtn'), pwdVerdict = document.getElementById('pwdVerdict');
+
+const urlInput = document.getElementById('urlInput'), scanUrlBtn = document.getElementById('scanUrlBtn'), urlResult = document.getElementById('urlResult'), checkRedirectBtn = document.getElementById('checkRedirectBtn');
+const qrInput = document.getElementById('qrInput'), qrResult = document.getElementById('qrResult');
+const headerInput = document.getElementById('headerInput'), analyzeHeaderBtn = document.getElementById('analyzeHeaderBtn'), headerResult = document.getElementById('headerResult');
+
+const sndReply = document.getElementById('sndReply');
+
+const summaryBox = document.getElementById('summaryBox');
+const logBox = document.getElementById('logBox');
+
+/* -------------------------
+   Utilities & storage
+   ------------------------- */
+const HISTORY_KEY = 'securibot_history_v1';
+function loadHistory(){ try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') } catch(e){ return [] } }
+function saveHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)) }
+function pushHistory(obj){ const h = loadHistory(); h.push(obj); if (h.length>400) h.splice(0,h.length-400); saveHistory(h); renderLogs(); }
+function renderLogs(){ const h = loadHistory().slice(-30).reverse(); logBox.innerHTML = h.map(x=>`<div class="mini">[${new Date(x.time).toLocaleString()}] ${x.label || x.type}: ${x.summary || (x.text||'')}</div>`).join('') }
+
+/* tiny sound helper */
+function playSound(){ try { sndReply.currentTime = 0; sndReply.play().catch(()=>{}); } catch(e){} }
+
+/* append chat message */
+function appendMessage(sender, text){
+  const wrap = document.createElement('div'); wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.alignItems = sender==='user' ? 'flex-end' : 'flex-start';
+  const m = document.createElement('div'); m.className = 'msg ' + (sender==='user' ? 'user' : 'bot'); m.textContent = text; wrap.appendChild(m);
+  const ts = document.createElement('span'); ts.className='mini'; ts.style.marginTop='6px'; ts.style.color='var(--muted)'; ts.textContent = new Date().toLocaleString(); wrap.appendChild(ts);
+  chatWindow.appendChild(wrap); chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+/* -------------------------
+   TOC / DFA logic
+   ------------------------- */
+const SUSPICIOUS_KEYWORDS = ['urgent','verify','password','click','bank','transfer','account','update','login','suspend','limited','prize','claim','otp','wire transfer','pay now','attachment','ssn'];
+
+function analyzeMessageDFA(text){
+  const lower = text.toLowerCase();
+  const states = ['q0'];
+  let state = 'q0';
+  const linkPattern = /https?:\/\/[^\s]+/i;
+  const credPattern = /(username|password|otp|pin|ssn|account number)/i;
+  let kHits=0;
+  SUSPICIOUS_KEYWORDS.forEach(k=>{ if (lower.includes(k)) kHits++; });
+  if (kHits>0){ state='q1'; states.push('q1') }
+  if (linkPattern.test(text) || credPattern.test(text)){ state='q2'; states.push('q2') }
+  if (kHits>=3 || (kHits>=1 && linkPattern.test(text)) || (credPattern.test(text) && linkPattern.test(text))){ state='qF'; states.push('qF') }
+  let label='Safe'; if (state==='q1') label='Suspicious'; if (state==='q2') label='Likely Suspicious'; if (state==='qF') label='Phishy';
+  return { progression: states, finalState: state, label, hits:{keywords:kHits,hasLink:!!linkPattern.test(text),hasCred:!!credPattern.test(text)} };
+}
+
+function animateMessageDfa(dfa){
+  [m_q0,m_q1,m_q2,m_qf].forEach(e=>e.classList.remove('on'));
+  dfaLabel.textContent = dfa.label;
+  let i=0;
+  (function step(){
+    if (i>0) [m_q0,m_q1,m_q2,m_qf].forEach(e=>e.classList.remove('on'));
+    if (i >= dfa.progression.length) return;
+    const q = dfa.progression[i];
+    const map = {'q0':m_q0,'q1':m_q1,'q2':m_q2,'qF':m_qf,'qf':m_qf};
+    if (map[q]) map[q].classList.add('on');
+    i++; setTimeout(step,420);
+  })();
+}
+
+/* -------------------------
+   Password DFA + entropy
+   ------------------------- */
+function analyzePasswordDFA(password){
+  const states=['q0'];
+  let hasLetter=false, hasNumber=false, hasSpecial=false;
+  let state='q0';
+  for (const ch of password){
+    if (/[a-zA-Z]/.test(ch)) hasLetter=true;
+    else if (/[0-9]/.test(ch)) hasNumber=true;
+    else hasSpecial=true;
+    if (hasLetter && !hasNumber && !hasSpecial) state='q1';
+    if (hasLetter && hasNumber && !hasSpecial) state='q2';
+    if (hasLetter && hasNumber && hasSpecial) state='q3';
+    states.push(state);
+  }
+  if (password.length>=8 && hasLetter && hasNumber && hasSpecial){ state='q4'; states.push('q4') }
+  return { progression: states, finalState: state, strong: state==='q4', hasLetter, hasNumber, hasSpecial };
+}
+
+function estimateEntropy(password){
+  let pool=0;
+  if (/[a-z]/.test(password)) pool += 26;
+  if (/[A-Z]/.test(password)) pool += 26;
+  if (/[0-9]/.test(password)) pool += 10;
+  if (/[^A-Za-z0-9]/.test(password)) pool += 32;
+  if (pool===0) return { bits:0, time:'Instant' };
+  const bits = Math.round(Math.log2(Math.pow(pool, password.length)));
+  const guesses = Math.pow(pool, password.length);
+  const seconds = guesses / 1e9;
+  return { bits, time: humanReadableSeconds(seconds) };
+}
+function humanReadableSeconds(s){
+  if (!isFinite(s) || s > 1e18) return '> 10^18 s';
+  if (s < 1) return '< 1s';
+  const units = [['y',31536000],['d',86400],['h',3600],['m',60],['s',1]];
+  let out=''; for (const [u,v] of units){ if (s>=v){ const n=Math.floor(s/v); out += `${n}${u} `; s -= n*v; } } return out.trim();
+}
+function animatePasswordDfa(dfa){
+  [p_q0,p_q1,p_q2,p_q3,p_q4].forEach(e=>e.classList.remove('on'));
+  pwdVerdict.textContent = 'Progress: ' + dfa.progression.join(' → ') + ' • Final: ' + dfa.finalState + (dfa.strong ? ' (ACCEPT)' : ' (REJECT)');
+  let i=0; const ids=['q0','q1','q2','q3','q4']; const els=[p_q0,p_q1,p_q2,p_q3,p_q4];
+  (function step(){ if (i>0) els.forEach(e=>e.classList.remove('on')); if (i >= dfa.progression.length) return; const q = dfa.progression[i]; const idx = ids.indexOf(q); if (idx>=0) els[idx].classList.add('on'); i++; setTimeout(step,420); })();
+}
+
+/* -------------------------
+   Heuristic "classifier"
+   ------------------------- */
+function heuristicThreatClassifier(text){
+  const m = analyzeMessageDFA(text);
+  let score = 0;
+  if (m.hits.keywords >= 1) score += 0.3;
+  if (m.hits.keywords >= 3) score += 0.4;
+  if (m.hits.hasLink) score += 0.2;
+  if (m.hits.hasCred) score += 0.3;
+  score = Math.max(0, Math.min(1, score));
+  let label='Safe'; if (score>=0.7) label='Phishy'; else if (score>=0.4) label='Suspicious';
+  return { label, confidence: Math.round(score*100)/100, score };
+}
+
+/* -------------------------
+   URL scanner
+   ------------------------- */
+function scanUrlHeuristics(url){
+  try {
+    const u = new URL(url);
+    const host = u.host;
+    const issuspicious = (host.split('-').length > 2) || /\d{1,3}(\.\d{1,3}){3}/.test(host) || host.length > 30;
+    const usesHttps = u.protocol === 'https:';
+    const path = u.pathname + u.search;
+    const weirdChars = /[@*<>]/.test(path);
+    const tiny = host.split('.').some(part => part.length <= 2);
+    return { valid:true, host, issuspicious, usesHttps, weirdChars, tiny };
+  } catch(e){ return { valid:false, error:'Invalid URL' } }
+}
+async function checkRedirect(url){
+  try {
+    const resp = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+    return { ok:true, finalUrl: resp.url, status: resp.status };
+  } catch(e){ return { ok:false, error:'CORS or network blocked (cannot check). Try server-side check.' } }
+}
+
+/* -------------------------
+   QR decode (BarcodeDetector) - file input
+   ------------------------- */
+async function decodeQRFromFile(file){
+  if (window.BarcodeDetector){
+    try {
+      const img = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0);
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      const results = await detector.detect(canvas);
+      if (results && results.length) return { ok:true, text: results[0].rawValue };
+      return { ok:false, error:'No QR found' };
+    } catch(e){ return { ok:false, error:'BarcodeDetector error: ' + e.message } }
+  } else {
+    return { ok:false, error:'BarcodeDetector not supported (use Chrome/Edge)' };
+  }
+}
+
+/* -------------------------
+   Email header analyze (very simple)
+   ------------------------- */
+function analyzeEmailHeader(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const res = { spf:'unknown', dkim:'unknown', from:null, received:[] };
+  lines.forEach(l=>{
+    const ll = l.toLowerCase();
+    if (ll.startsWith('received:')) res.received.push(l.substring(9).trim());
+    if (ll.includes('spf=')) res.spf = l.split('spf=')[1].split(';')[0].trim();
+    if (ll.includes('dkim-signature') || ll.includes('dkim=')) res.dkim = 'present';
+    if (ll.startsWith('from:')) res.from = l.substring(5).trim();
+  });
+  const suspiciousReceived = res.received.some(r => /\[?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]?/.test(r) && !r.includes('google') && !r.includes('amazonaws'));
+  return { parsed:res, suspiciousReceived };
+}
+
+/* -------------------------
+   OTP scam generator
+   ------------------------- */
+const SCAM_OTP_EXAMPLES = [
+  "URGENT: Your account will be locked. Reply with OTP to restore access.",
+  "We detected a login. Verify with OTP 6-digit now to avoid suspension.",
+  "Congratulations! You've won. Send OTP to claim prize."
+];
+function generateScamOtp(){ return SCAM_OTP_EXAMPLES[Math.floor(Math.random()*SCAM_OTP_EXAMPLES.length)]; }
+
+/* -------------------------
+   Voice: SpeechRecognition + TTS
+   ------------------------- */
+let recognition = null;
+let voiceInputActive = false;
+let speakEnabled = false;
+if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = e => {
+    const txt = e.results[0][0].transcript;
+    appendMessage('user', txt);
+    botThinkThenReply(txt);
+  };
+  recognition.onerror = e => { console.warn('Speech error', e); voiceInputActive=false; voiceInputBtn.textContent='Voice Input'; };
+  recognition.onend = ()=> { voiceInputActive=false; voiceInputBtn.textContent='Voice Input'; };
+}
+function speakText(text){
+  if (!('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } catch(e){}
+}
+
+/* -------------------------
+   Process input & respond
+   ------------------------- */
+function processUserMessage(raw){
+  const msg = raw.trim();
+  if (!msg) return { text:'Please type something.' };
+
+  // 1) password: "check password: <pw>"
+  const pwdMatch = msg.match(/(?:^|[^a-zA-Z0-9])(check (?:password|pwd)|pwd|password)\s*[:\-]?\s*(.+)$/i);
+  if (pwdMatch && pwdMatch[2]) {
+    const pw = pwdMatch[2].trim();
+    const dfa = analyzePasswordDFA(pw);
+    const ent = estimateEntropy(pw);
+    const prog = dfa.progression.join(' → ');
+    const verdict = dfa.strong ? 'STRONG ✔' : 'WEAK ❌';
+    return { text: `Password analysis for "${pw}":\nStates: ${prog}\nFinal: ${dfa.finalState}\nVerdict: ${verdict}\nEntropy: ${ent.bits} bits `, summary:`Password checked — ${verdict}`, pwdDfa: dfa };
+  }
+
+  // 2) URL scan in chat: "scan url: https://..."
+  const urlMatch = msg.match(/(?:scan url|check url|url)\s*[:\-]?\s*(https?:\/\/[^\s]+)/i);
+  if (urlMatch && urlMatch[1]){
+    const res = scanUrlHeuristics(urlMatch[1]);
+    const text = res.valid ? `Host: ${res.host}\nHTTPS: ${res.usesHttps}\nSuspicious host: ${res.issuspicious}\nWeird path: ${res.weirdChars}` : 'Invalid URL';
+    return { text, summary: `URL scanned — ${res.valid ? (res.issuspicious ? 'Suspicious' : 'OK') : 'Invalid'}`, urlScan: res };
+  }
+
+  // 3) learning commands
+  if (/explain dfa|what is dfa|explain automata/i.test(msg)){
+    return { text: 'DFA (Deterministic Finite Automaton): A finite-state machine that reads input symbols one at a time and changes state. If it ends in an accept state, the input is accepted. We visualize q0→q1→... to show processing.', summary:'Explained DFA' };
+  }
+  if (/explain regex/i.test(msg)) return { text: 'Regex: pattern language for strings, e.g. /\\d{4}/ matches 4 digits. Regexes and DFAs are closely related.', summary:'Explained regex' };
+  if (/what is automata|what are automata/i.test(msg)) return { text: 'Automata: abstract machines used to model computation and languages. DFAs are simple automata useful for pattern recognition.', summary:'Explained automata' };
+
+  // 4) generate scam / OTP
+  if (/scam otp|generate scam|fake otp/i.test(msg)) return { text: generateScamOtp(), summary:'Generated scam example' };
+
+  // 5) start quiz
+  if (/start quiz|quiz/i.test(msg)){ startQuiz(); return { text:'Quiz started (check prompts).', summary:'Quiz started' }; }
+
+  // 6) default message analysis
+  const msgDfa = analyzeMessageDFA(msg);
+  const heuristic = heuristicThreatClassifier(msg);
+  const advice = msgDfa.finalState === 'qF' ? 'High risk — possible phishing. Do not click links or provide credentials.' : msgDfa.finalState === 'q2' ? 'Likely suspicious — verify the sender.' : msgDfa.finalState === 'q1' ? 'Suspicious — be cautious.' : 'Looks safe.';
+  const reply = `Message analysis:\nCategory: ${msgDfa.label}\nClassifier: ${heuristic.label} (confidence: ${heuristic.confidence})\n${advice}`;
+  return { text: reply, summary:`Message analyzed — ${msgDfa.label}`, msgDfa, heuristic };
+}
+
+/* -------------------------
+   Bot think & reply (UI)
+   ------------------------- */
+function botThinkThenReply(userText){
+  typingBox.style.display = 'block';
+  avatar.classList.add('glow');
+  statusLine.textContent = 'Securibot is thinking...';
+
+  setTimeout(()=> {
+    typingBox.style.display = 'none';
+    avatar.classList.remove('glow');
+    const reply = processUserMessage(userText);
+    appendMessage('bot', reply.text);
+    summaryBox.textContent = reply.summary || '—';
+    pushHistory({ type:'analysis', label: reply.summary || 'analysis', text: userText, summary: reply.summary || '', time: new Date().toISOString() });
+    renderLogs();
+    playSound();
+    if (reply.msgDfa) animateMessageDfa(reply.msgDfa);
+    if (reply.pwdDfa) animatePasswordDfa(reply.pwdDfa);
+    if (reply.urlScan) { /* additional UI could show url details */ }
+    if (speakEnabled) speakText(reply.text);
+  }, 700 + Math.min(userText.length * 6, 1200));
+}
+
+/* -------------------------
+   Event wiring
+   ------------------------- */
+sendBtn.addEventListener('click', ()=> {
+  const t = userInput.value.trim(); if (!t) return;
+  appendMessage('user', t); userInput.value='';
+  botThinkThenReply(t);
+});
+userInput.addEventListener('keydown', (e)=> { if (e.key==='Enter') sendBtn.click(); });
+
+clearBtn.addEventListener('click', ()=> {
+  chatWindow.innerHTML = ''; summaryBox.textContent = 'Cleared'; [m_q0,m_q1,m_q2,m_qf,t_q0,t_q1,t_q2,t_qf,p_q0,p_q1,p_q2,p_q3,p_q4].forEach(e=> e && e.classList.remove('on'));
+  dfaLabel.textContent='—'; pwdVerdict.textContent='No password checked';
+});
+
+saveBtn.addEventListener('click', ()=> {
+  const nodes = Array.from(chatWindow.querySelectorAll('.msg'));
+  if (!nodes.length) { alert('No chat to export'); return; }
+  const lines = nodes.map(n => { const who = n.classList.contains('user') ? 'USER' : 'SECURIBOT'; const ts = n.nextSibling ? n.nextSibling.textContent : new Date().toLocaleString(); return `[${ts}] ${who}: ${n.textContent}`; });
+  const blob = new Blob([lines.join('\n')], { type:'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `securibot-chat-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+});
+
+/* examples toggle */
+examplesToggle.addEventListener('click', ()=> { examplesPanel.style.display = examplesPanel.style.display === 'none' ? 'block' : 'none'; });
+examplesPanel.querySelectorAll('button').forEach(b => b.addEventListener('click', e => { const t = e.currentTarget.dataset.txt; appendMessage('user', t); botThinkThenReply(t); }));
+
+/* sample password */
+samplePwd.addEventListener('click', ()=> { const p='Hri@2025'; appendMessage('user','check password: ' + p); botThinkThenReply('check password: ' + p); });
+
+/* password analyze UI */
+pwdCheckBtn.addEventListener('click', ()=> {
+  const pw = pwdInput.value || ''; if (!pw) { alert('Type password'); return; }
+  const dfa = analyzePasswordDFA(pw); animatePasswordDfa(dfa); const ent = estimateEntropy(pw);
+  appendMessage('bot', `Password: ${pw}\nFinal: ${dfa.finalState}\nStrong: ${dfa.strong}\nEntropy: ${ent.bits} bits • Time: ${ent.time}`);
+  pushHistory({ type:'password', label:'Password check', summary: dfa.strong ? 'STRONG':'WEAK', text: '***', time: new Date().toISOString() });
+});
+pwdGenBtn.addEventListener('click', ()=> { const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()-_=+"; let p=""; for (let i=0;i<14;i++) p += chars[Math.floor(Math.random()*chars.length)]; pwdInput.value = p; pwdCheckBtn.click(); });
+
+/* training visualizer */
+trainRun.addEventListener('click', ()=> {
+  const s = trainInput.value.trim(); if (!s) return alert('Type input'); const dfa = analyzeMessageDFA(s); animateTrainingDfa(dfa); trainLabel.textContent = dfa.label;
+});
+trainClear.addEventListener('click', ()=> { trainInput.value=''; [t_q0,t_q1,t_q2,t_qf].forEach(e=>e.classList.remove('on')); trainLabel.textContent='—'; });
+function animateTrainingDfa(dfa){ [t_q0,t_q1,t_q2,t_qf].forEach(e=>e.classList.remove('on')); let i=0; (function step(){ if (i>0) [t_q0,t_q1,t_q2,t_qf].forEach(e=>e.classList.remove('on')); if (i >= dfa.progression.length) return; const q = dfa.progression[i]; const map = {'q0':t_q0,'q1':t_q1,'q2':t_q2,'qF':t_qf,'qf':t_qf}; if (map[q]) map[q].classList.add('on'); i++; setTimeout(step,420); })(); }
+
+/* url scan */
+scanUrlBtn.addEventListener('click', ()=> {
+  const u = urlInput.value.trim(); if (!u) return alert('Paste URL'); const r = scanUrlHeuristics(u); urlResult.textContent = r.valid ? `Host: ${r.host} • HTTPS:${r.usesHttps} • Suspicious:${r.issuspicious}` : 'Invalid URL'; pushHistory({ type:'url', label:'URL scan', summary: r.issuspicious ? 'Suspicious' : 'OK', text: u, time: new Date().toISOString() });
+});
+checkRedirectBtn.addEventListener('click', async ()=> {
+  const u = urlInput.value.trim(); if (!u) return alert('Paste URL'); urlResult.textContent = 'Checking… (may fail due to CORS)'; const r = await checkRedirect(u); urlResult.textContent = r.ok ? `Final: ${r.finalUrl} (status ${r.status})` : `Error: ${r.error}`;
+});
+
+/* qr decode */
+qrInput.addEventListener('change', async (e)=> {
+  const file = e.target.files[0]; if (!file) return; qrResult.textContent = 'Decoding…'; const res = await decodeQRFromFile(file); qrResult.textContent = res.ok ? `QR content: ${res.text}` : `Failed: ${res.error}`;
+});
+
+/* analyze header */
+analyzeHeaderBtn.addEventListener('click', ()=> {
+  const raw = headerInput.value.trim(); if (!raw) return alert('Paste headers'); const r = analyzeEmailHeader(raw); headerResult.textContent = `From: ${r.parsed.from || 'unknown'} • SPF: ${r.parsed.spf} • DKIM: ${r.parsed.dkim} • Suspicious Received: ${r.suspiciousReceived}`; pushHistory({ type:'email', label:'Header analyze', summary: r.suspiciousReceived ? 'Suspicious' : 'OK', text:'headers', time: new Date().toISOString() });
+});
+
+/* voice / TTS toggles */
+voiceBtn.addEventListener('click', ()=> {
+  voiceBtn.classList.toggle('on');
+  voiceBtn.textContent = voiceBtn.classList.contains('on') ? '🎤 Voice (on)' : '🎤 Voice';
+  // enabling TTS only affects whether replies are spoken when speakEnabled true (ttsBtn toggles)
+});
+voiceInputBtn.addEventListener('click', ()=> {
+  if (!recognition){ alert('SpeechRecognition unsupported. Use Chrome/Edge'); return; }
+  if (!voiceInputActive){ recognition.start(); voiceInputActive = true; voiceInputBtn.textContent = 'Stop Voice Input'; } else { recognition.stop(); voiceInputActive = false; voiceInputBtn.textContent = 'Voice Input'; }
+});
+ttsBtn.addEventListener('click', ()=> {
+  speakEnabled = !speakEnabled; ttsBtn.textContent = speakEnabled ? 'Speak Reply (on)' : 'Speak Reply';
+});
+
+/* theme toggle */
+themeBtn.addEventListener('click', ()=> {
+  const on = document.body.classList.toggle('light');
+  themeBtn.textContent = on ? '🌙 Dark' : '🌓 Theme';
+});
+
+
+/* quiz (simple) */
+function startQuiz(){
+  const q = [
+    { q: 'Which DFA state means "contains credential request or link"?', options: ['q1','q2','qF'], correct: 'q2' },
+    { q: 'What increases password strength the most?', options: ['length','uppercase only','numbers only'], correct: 'length' }
+  ];
+  let i=0, score=0;
+  (function next(){
+    if (i>=q.length){ appendMessage('bot', `Quiz finished — score ${score}/${q.length}`); return; }
+    const cur = q[i];
+    const ans = prompt(`${cur.q}\nOptions: ${cur.options.join(', ')}`);
+    if (!ans){ appendMessage('bot','Quiz cancelled'); return; }
+    if (ans.toLowerCase().includes(cur.correct.toLowerCase())){ score++; appendMessage('bot','Correct!'); } else { appendMessage('bot','Wrong. Hint: ' + cur.correct); }
+    i++; setTimeout(next,300);
+  })();
+}
+
+/* initial welcome and load history */
+appendMessage('bot','Securibot online — ask about phishing, check password: <pw>, scan url: <url>, or type "explain dfa".');
+const hist = loadHistory(); if (hist.length) summaryBox.textContent = `Loaded ${hist.length} saved events from local history.`; renderLogs();
+
+/* unlock audio on first gesture */
+window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.pause()); } catch(e){} }, { once:true });
+
+</script>
+</body>
+</html>
