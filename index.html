@@ -415,7 +415,10 @@ const replies = {
 
 
 
-
+sendBtn.addEventListener('click', handleUserInput);
+userInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleUserInput();
+});
 /* function to get bot reply */
 function getReply(input){
   const text = input.toLowerCase().trim();
@@ -702,11 +705,7 @@ function botThinkThenReply(userText){
 /* -------------------------
    Event wiring
    ------------------------- */
-sendBtn.addEventListener('click', ()=> {
-  const t = userInput.value.trim(); if (!t) return;
-  appendMessage('user', t); userInput.value='';
-  botThinkThenReply(t);
-});
+
 userInput.addEventListener('keydown', (e)=> { if (e.key==='Enter') sendBtn.click(); });
 
 clearBtn.addEventListener('click', ()=> {
