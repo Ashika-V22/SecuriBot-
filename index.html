@@ -415,11 +415,6 @@ const replies = {
 
 
 
-// Connect button & Enter key
-sendBtn.addEventListener('click', handleUserInput);
-userInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleUserInput();
-});
 
 /* function to get bot reply */
 function getReply(input){
@@ -816,3 +811,4 @@ window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.
 </script>
 </body>
 </html>
+
