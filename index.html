@@ -702,6 +702,11 @@ function botThinkThenReply(userText){
   }, 700 + Math.min(userText.length * 6, 1200));
 }
 
+  sendBtn.addEventListener('click', ()=> {
+  const t = userInput.value.trim(); if (!t) return;
+  appendMessage('user', t); userInput.value='';
+  botThinkThenReply(t);
+});
 /* -------------------------
    Event wiring
    ------------------------- */
@@ -810,4 +815,5 @@ window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.
 </script>
 </body>
 </html>
+
 
