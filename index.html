@@ -420,15 +420,45 @@ userInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleUserInput();
 });
 /* function to get bot reply */
+/* function to get bot reply */
 function getReply(input){
-  const text = input.toLowerCase().trim();
+  const text = input.trim();
 
-  // match specific commands with startsWith
-  if(text.startsWith("check password:")) return "Running password analysis... 🔐";
-  if(text.startsWith("scan url:")) return "Scanning the URL for threats... 🌐";
+  if(text.toLowerCase().startsWith("check password:")){
+    const pwd = text.slice("check password:".length).trim();
+    if(!pwd) return "Please provide a password after 'check password:'.";
 
-  // generic replies
-  return replies[text] || "Sorry, I didn't understand that. 🤔";
+    const dfa = analyzePasswordDFA(pwd);
+    const entropy = estimateEntropy(pwd);
+
+    // Animate the DFA visually
+    animatePasswordDfa(dfa);
+
+    // Prepare message with HTML line breaks
+    const message = `
+    Password analysis 🔐
+  - States: ${dfa.progression.join(' → ')}
+  - Final State: ${dfa.finalState} ${dfa.strong ? '(Strong ✅)' : '(Weak ❌)'}
+  - Contains letter: ${dfa.hasLetter}, number: ${dfa.hasNumber}, special char: ${dfa.hasSpecial}
+  - Entropy: ${entropy.bits} )
+    `;
+
+    appendMessage('bot', message);
+
+    pushHistory({ 
+      type: 'password', 
+      label: 'Password check', 
+      summary: dfa.strong ? 'STRONG' : 'WEAK', 
+      text: '***', 
+     
+    });
+
+    return;
+  }
+
+  if(text.toLowerCase().startsWith("scan url:")) return "Scanning the URL for threats... 🌐";
+
+  return replies[text.toLowerCase()] || "Sorry, I didn't understand that. 🤔";
 }
 
 /* -------------------------
@@ -815,5 +845,6 @@ window.addEventListener('click', ()=> { try { sndReply.play().then(()=>sndReply.
 </script>
 </body>
 </html>
+
 
 
